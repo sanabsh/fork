@@ -1,0 +1,86 @@
+#include<cmath>
+#include <iostream>
+#include <stdio.h>   /* printf, stderr, fprintf */
+#include <sys/types.h> /* pid_t */
+#include <sys/wait.h> /* wait */
+#include <unistd.h>  /* _exit, fork */
+#include <stdlib.h>  /* exit */
+#include <errno.h>   /* errno */
+
+using namespace std;
+
+double f(double x)
+{
+  return 10 *abs(sin(0.25*x));
+}
+
+double calc_area(double a, int i , double h)
+{
+    double x = a + i * h;
+    return x;
+}
+
+double calc_sum(double sum, double x)
+{
+    double total_sum = sum + f(x);
+    return total_sum;
+}
+
+int main(void)
+{
+   double a,b,h,x,sum=0,integral;
+   int n;
+   pid_t  pid;
+
+
+   cout << "please enter the number of sections: ";
+   cin >> n;
+
+   cout << "please enter the initial limit: ";
+   cin >> a;
+
+   cout << "please enter the final limit: ";
+   cin >> b;
+
+   h=(b-a)/n;
+
+   pid = fork();
+
+   if (pid == -1)
+   {
+      cout << "ERROR !!! " << endl;
+   }
+   else if (pid == 0)
+   {
+      
+      int  j;
+      for (j = 1; j <n; j++)
+      {
+         
+         cout<< "child : " << j<<endl;
+         x = calc_area(a , j , h);
+         cout<< "area is : " << x << endl;
+         cout << "----------------------------" << endl;
+      }
+      _exit(0); 
+   }
+   else
+   {
+      /* When fork() returns a positive number, we are in the parent process*/
+     
+      wait(NULL);
+      int  i;
+      for (i = 1; i <n; i++)
+      {
+         cout << "Parent :" << i << endl;
+         sum = calc_sum(sum , x);
+         cout << "summation is : " << sum << endl;
+         cout << "----------------------------" << endl;
+      }
+      integral=(h/2)*(f(a)+f(b)+2*sum);
+      cout << "Result is : " << integral << endl;
+      exit(0);
+   }
+
+   return 0;
+}
